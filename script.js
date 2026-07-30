@@ -172,6 +172,14 @@ const dateInput = document.getElementById("adventureDate");
 const dateMessage = document.getElementById("dateMessage");
 const confirmButton = document.getElementById("confirmDateBtn");
 
+const countdownCard = document.getElementById("countdownCard");
+const countdownDays = document.getElementById("countdownDays");
+const countdownHours = document.getElementById("countdownHours");
+const countdownMinutes = document.getElementById("countdownMinutes");
+const countdownSeconds = document.getElementById("countdownSeconds");
+
+let countdownInterval;
+
 
 // Prevent choosing a past date.
 const today = new Date();
@@ -250,6 +258,7 @@ dateForm.addEventListener("submit", async (event) => {
     dateInput.disabled = true;
 
     launchDateConfetti();
+    startAdventureCountdown(selectedDate);
 
 } catch (error) {
     console.error("Error saving date:", error);
@@ -327,4 +336,58 @@ function launchDateConfetti() {
             confetti.remove();
         }, 4200);
     }
+}
+function startAdventureCountdown(dateValue) {
+
+    clearInterval(countdownInterval);
+
+    const targetDate = new Date(dateValue + "T00:00:00");
+
+    countdownCard.hidden = false;
+
+    function updateCountdown() {
+
+        const now = new Date();
+
+        const difference = targetDate - now;
+
+        if (difference <= 0) {
+
+            countdownCard.innerHTML = `
+                <h2>🌊 It's Adventure Day!</h2>
+            `;
+
+            clearInterval(countdownInterval);
+
+            return;
+        }
+
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+
+        const hours = Math.floor(
+            (difference % (1000 * 60 * 60 * 24))
+            / (1000 * 60 * 60)
+        );
+
+        const minutes = Math.floor(
+            (difference % (1000 * 60 * 60))
+            / (1000 * 60)
+        );
+
+        const seconds = Math.floor(
+            (difference % (1000 * 60))
+            / 1000
+        );
+
+        countdownDays.textContent = days;
+        countdownHours.textContent = hours;
+        countdownMinutes.textContent = minutes;
+        countdownSeconds.textContent = seconds;
+
+    }
+
+    updateCountdown();
+
+    countdownInterval = setInterval(updateCountdown, 1000);
+
 }
