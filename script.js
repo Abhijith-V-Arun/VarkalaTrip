@@ -341,53 +341,78 @@ function startAdventureCountdown(dateValue) {
 
     clearInterval(countdownInterval);
 
-    const targetDate = new Date(dateValue + "T00:00:00");
+    const targetDate = new Date(`${dateValue}T00:00:00`);
 
     countdownCard.hidden = false;
+
+    function updateNumber(element, value) {
+
+        const formattedValue = String(value).padStart(2, "0");
+
+        if (element.textContent !== formattedValue) {
+
+            element.classList.add("countdown-tick");
+
+            setTimeout(() => {
+                element.textContent = formattedValue;
+                element.classList.remove("countdown-tick");
+            }, 120);
+
+        }
+    }
 
     function updateCountdown() {
 
         const now = new Date();
-
-        const difference = targetDate - now;
+        const difference = targetDate.getTime() - now.getTime();
 
         if (difference <= 0) {
 
+            clearInterval(countdownInterval);
+
             countdownCard.innerHTML = `
-                <h2>🌊 It's Adventure Day!</h2>
+                <div class="countdown-icon">🌊</div>
+
+                <div class="countdown-complete">
+                    Today is the day!<br>
+                    Our Varkala adventure begins now ✨
+                </div>
             `;
 
-            clearInterval(countdownInterval);
+            launchDateConfetti();
 
             return;
         }
 
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const days = Math.floor(
+            difference / (1000 * 60 * 60 * 24)
+        );
 
         const hours = Math.floor(
-            (difference % (1000 * 60 * 60 * 24))
-            / (1000 * 60 * 60)
+            (difference % (1000 * 60 * 60 * 24)) /
+            (1000 * 60 * 60)
         );
 
         const minutes = Math.floor(
-            (difference % (1000 * 60 * 60))
-            / (1000 * 60)
+            (difference % (1000 * 60 * 60)) /
+            (1000 * 60)
         );
 
         const seconds = Math.floor(
-            (difference % (1000 * 60))
-            / 1000
+            (difference % (1000 * 60)) /
+            1000
         );
 
-        countdownDays.textContent = days;
-        countdownHours.textContent = hours;
-        countdownMinutes.textContent = minutes;
-        countdownSeconds.textContent = seconds;
-
+        updateNumber(countdownDays, days);
+        updateNumber(countdownHours, hours);
+        updateNumber(countdownMinutes, minutes);
+        updateNumber(countdownSeconds, seconds);
     }
 
     updateCountdown();
 
-    countdownInterval = setInterval(updateCountdown, 1000);
-
+    countdownInterval = setInterval(
+        updateCountdown,
+        1000
+    );
 }
