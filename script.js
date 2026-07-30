@@ -1,3 +1,21 @@
+console.log("SCRIPT VERSION 2 LOADED");
+
+
+import emailjs from
+    "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm";
+
+const emailJsConfig = {
+    publicKey: "ihPtuw1I5LTejZE88",
+    serviceId: "service_vq9iuu5",
+    templateId: "template_780q3wl"
+};
+
+emailjs.init({
+    publicKey: emailJsConfig.publicKey
+});
+
+
+
 const reveals = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
@@ -185,36 +203,67 @@ dateForm.addEventListener("submit", async (event) => {
     showDateMessage("Confirming the adventure date...", "");
 
     try {
-        await addDoc(collection(database, "adventureDates"), {
-            selectedDate: selectedDate,
-            readableDate: readableDate,
-            submittedAt: serverTimestamp(),
-            source: "Varkala Adventure Website"
-        });
+    // 1. Save the selected date to Firestore
+    await addDoc(collection(database, "adventureDates"), {
+        selectedDate: selectedDate,
+        readableDate: readableDate,
+        submittedAt: serverTimestamp(),
+        source: "Varkala Adventure Website"
+    });
 
-        showDateMessage(
-            `${readableDate} has been selected. Adventure confirmed!`,
-            "success"
+    // 2. Prepare the email time
+    const submittedTime = new Date().toLocaleString("en-IN", {
+        dateStyle: "full",
+        timeStyle: "short",
+        timeZone: "Asia/Kolkata"
+    });
+
+    // 3. Send the email notification
+    try {
+        await emailjs.send(
+            emailJsConfig.serviceId,
+            emailJsConfig.templateId,
+            {
+                readable_date: readableDate,
+                submitted_time: submittedTime
+            }
         );
 
-        confirmButton.querySelector("span:first-child").textContent =
-            "Adventure Date Confirmed";
-
-        dateInput.disabled = true;
-
-        launchDateConfetti();
-    } catch (error) {
-        console.error("Error saving date:", error);
-
-        showDateMessage(
-            "The date could not be saved. Please try again.",
-            "error"
+        console.log("Email notification sent successfully.");
+    } catch (emailError) {
+        console.error(
+            "Date was saved, but the email notification failed:",
+            emailError
         );
-
-        confirmButton.disabled = false;
-        confirmButton.querySelector("span:first-child").textContent =
-            "Confirm Adventure Date";
     }
+
+    // 4. Show success on the website
+    showDateMessage(
+        `${readableDate} has been selected. Adventure confirmed!`,
+        "success"
+    );
+
+    confirmButton.querySelector("span:first-child").textContent =
+        "Adventure Date Confirmed";
+
+    confirmButton.disabled = true;
+    dateInput.disabled = true;
+
+    launchDateConfetti();
+
+} catch (error) {
+    console.error("Error saving date:", error);
+
+    showDateMessage(
+        "The date could not be saved. Please try again.",
+        "error"
+    );
+
+    confirmButton.disabled = false;
+
+    confirmButton.querySelector("span:first-child").textContent =
+        "Confirm Adventure Date";
+}
 });
 
 
