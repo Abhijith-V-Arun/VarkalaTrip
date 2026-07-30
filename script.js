@@ -257,6 +257,11 @@ dateForm.addEventListener("submit", async (event) => {
     confirmButton.disabled = true;
     dateInput.disabled = true;
 
+        localStorage.setItem(
+    "confirmedAdventureDate",
+    selectedDate
+    );
+
     launchDateConfetti();
     startAdventureCountdown(selectedDate);
 
@@ -415,4 +420,24 @@ function startAdventureCountdown(dateValue) {
         updateCountdown,
         1000
     );
+}
+const savedAdventureDate =
+    localStorage.getItem("confirmedAdventureDate");
+
+if (savedAdventureDate) {
+
+    dateInput.value = savedAdventureDate;
+    dateInput.disabled = true;
+    confirmButton.disabled = true;
+
+    confirmButton
+        .querySelector("span:first-child")
+        .textContent = "Adventure Date Confirmed";
+
+    showDateMessage(
+        `${formatSelectedDate(savedAdventureDate)} has been selected.`,
+        "success"
+    );
+
+    startAdventureCountdown(savedAdventureDate);
 }
